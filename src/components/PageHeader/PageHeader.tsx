@@ -23,9 +23,13 @@ const StyledPageHeader = styled.div`
   flex-direction: column;
   padding-bottom: ${props => props.theme.spacing[6]}px;
   padding-top: ${props => props.theme.spacing[6]}px;
-  max-width: 512px;
+  max-width: 325px;
   width: 100%;
   margin: 0 auto;
+
+  ${({theme}) => theme.mediaQueries.md} {
+    max-width: 512px;
+  }
 `
 
 const StyledIcon = styled.div`
@@ -40,6 +44,7 @@ const StyledTitle = styled.h1`
   color: ${props => props.theme.color.grey[100]};
   font-size: 36px;
   font-weight: 700;
+  text-align: center;
   margin: 0;
   padding: 0;
 `
