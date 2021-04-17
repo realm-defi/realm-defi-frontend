@@ -1,9 +1,9 @@
-export type Colors = {
-  primary: string
-  pricePrimary: string
-  priceSecondary: string
-  priceTertiary: string
-  cardBackground: string
+export type PriceColors = {
+  primaryText?: string
+  primary?: string
+  secondary?: string
+  tertiary?: string
+  cardBackground?: string
 }
 
 export type Breakpoints = string[]

@@ -1,13 +1,13 @@
-import { Colors } from './types';
+import { PriceColors } from './types';
 
 export const white = '#FFF';
 export const black = '#000';
 
-export const baseColors: Colors = {
-  primary: '#314753',
-  pricePrimary: '#d74796',
-  priceSecondary: '#e49643',
-  priceTertiary: '#c63535',
+export const baseColors: PriceColors = {
+  primaryText: '#314753',
+  primary: '#d74796',
+  secondary: '#e49643',
+  tertiary: '#c63535',
   cardBackground: 'rgba(255, 255, 255, 0.7)',
 };
 

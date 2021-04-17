@@ -16,6 +16,7 @@ const StyledFooter = styled.footer`
   display: flex;
   justify-content: center;
   overflow-y: scroll;
+  height: 32px;
   padding: 20px 0;
 `
 const StyledFooterInner = styled.div`

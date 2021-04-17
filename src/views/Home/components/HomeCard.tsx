@@ -1,18 +1,21 @@
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import Label from '../../../components/Label';
-import { TokenStat } from '../../../basis-cash/types';
+import ValueCounter from '../../../components/ValueCounter';
+import { TokenStat } from '../../../realm-defi/types';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import TokenSymbol from '../../../components/TokenSymbol';
-import { commify } from 'ethers/lib/utils';
+import Button from '../../../components/Button';
 import config from '../../../config';
+import { OpenExternal } from '../../../components/icons';
 
 interface HomeCardProps {
   title: string;
   symbol: string;
   color: string;
-  supplyLabel?: string;
   address: string;
+  largeSize?: boolean;
+  variant?: 'nobles' | 'peons' | 'exiled';
   stat?: TokenStat;
 }
 
@@ -21,64 +24,125 @@ const HomeCard: React.FC<HomeCardProps> = ({
   symbol,
   color,
   address,
-  supplyLabel = 'Total Supply',
+  largeSize = false,
+  variant,
   stat,
 }) => {
   const tokenUrl = `${config.etherscanUrl}/token/${address}`;
+
+  const {
+    color: { priceColors },
+  } = useContext(ThemeContext);
   return (
     <Wrapper>
-      <CardHeader>{title}</CardHeader>
       <StyledCards>
-        <TokenSymbol symbol={symbol} />
+        <OpenLogo href={tokenUrl} target="blank">
+          <OpenExternal color={color} />
+        </OpenLogo>
+        <TokenSymbol symbol={symbol} size={largeSize ? 256 : 192} />
+        <CardHeader>{title}</CardHeader>
         <CardSection>
+          <Label text="Current Price" color={color} />
           {stat ? (
-            <StyledValue>{(stat.priceInDAI !== '-' ? '$' : '') + stat.priceInDAI}</StyledValue>
+            <>
+              <ValueCounter
+                value={Number(stat.priceInBusd)}
+                decimals={2}
+                color={priceColors.primary}
+              />
+            </>
           ) : (
             <ValueSkeleton />
           )}
-          <Label text="Current Price" color={color} />
-        </CardSection>
-
-        <CardSection>
-          {stat ? <StyledValue>{commify(stat.totalSupply)}</StyledValue> : <ValueSkeleton />}
-          <StyledSupplyLabel href={tokenUrl} target="_blank" color={color}>
-            {supplyLabel}
-          </StyledSupplyLabel>
+          <Label text="Circulating Supply" color={color} />
+          {/* // TODO: how to show circulating supply? */}
+          {stat ? (
+            <>
+              <ValueCounter value={1500} decimals={0} color={priceColors.secondary} />
+            </>
+          ) : (
+            <ValueSkeleton />
+          )}
+          <Label text="Total Supply" color={color} />
+          {stat ? (
+            <>
+              <ValueCounter
+                value={Number(stat.totalSupply)}
+                decimals={0}
+                color={priceColors.secondary}
+              />
+            </>
+          ) : (
+            <ValueSkeleton />
+          )}
         </CardSection>
       </StyledCards>
+      <PurchaseButton>
+        {/* TODO: replace with logic for disables */}
+        <Button
+          text={`Buy ${title}`}
+          variant={variant}
+          disabled={variant === 'exiled' ? true : false}
+        />
+      </PurchaseButton>
     </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
-  @media (max-width: 768px) {
-    margin-top: ${(props) => props.theme.spacing[4]}px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: max-content;
+
+  ${({ theme }) => theme.mediaQueries.md} {
+    height: max-content;
   }
 `;
 
+const OpenLogo = styled.a`
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`;
+
+const PurchaseButton = styled.div`
+  margin-top: 10px;
+`;
+
 const CardHeader = styled.h2`
-  color: #fff;
+  margin: 0;
+  color: ${(props) => props.theme.color.primary.main};
   text-align: center;
+  font-size: 40px;
+  font-weight: bold;
 `;
 
 const StyledCards = styled.div`
-  min-width: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: ${(props) => props.theme.card.background};
+  border-radius: 32px;
+  min-width: 300px;
+  width: 90%;
+
   padding: ${(props) => props.theme.spacing[3]}px;
-  color: ${(props) => props.theme.color.white};
-  background-color: ${(props) => props.theme.color.grey[900]};
-  border-radius: 5px;
-  @media (max-width: 768px) {
+  color: ${(props) => props.theme.color.primary.main};
+
+  ${({ theme }) => theme.mediaQueries.xl} {
     width: 100%;
   }
 `;
 
-const StyledValue = styled.span`
-  display: inline-block;
-  font-size: 36px;
-  color: #eeeeee;
-`;
-
 const CardSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: ${(props) => props.theme.spacing[4]}px;
 
   &:last-child {
@@ -91,32 +155,15 @@ const ValueSkeletonPadding = styled.div`
   padding-bottom: ${(props) => props.theme.spacing[2]}px;
 `;
 
-const StyledSupplyLabel = styled.a`
-  display: block;
-  color: ${(props) => props.color};
-`;
-
 const ValueSkeleton = () => {
   const theme = useContext(ThemeContext);
   return (
-    <SkeletonTheme color={theme.color.grey[700]} highlightColor={theme.color.grey[600]}>
+    <SkeletonTheme color={theme.color.primary.main} highlightColor={theme.color.grey[700]}>
       <ValueSkeletonPadding>
-        <Skeleton height={10} />
+        <Skeleton height={10} width={100} />
       </ValueSkeletonPadding>
     </SkeletonTheme>
   );
 };
-
-const GuideText = styled.span`
-  color: ${(props) => props.theme.color.primary.main};
-  font-size: 0.8rem;
-`;
-
-const ValueText = styled.p`
-  color: ${(props) => props.theme.color.white};
-  font-weight: bold;
-  font-size: 1.25rem;
-  margin: ${(props) => props.theme.spacing[1]}px 0;
-`;
 
 export default HomeCard;
