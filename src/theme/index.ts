@@ -1,6 +1,19 @@
-import { black, purple, teal, grey, red, white } from './colors'
+import { baseColors, black, purple, teal, grey, red, white } from './colors';
+import { breakpoints, mediaQueries } from './mediaQueries';
+import { MediaQueries, Breakpoints } from './types';
 
-const theme = {
+export interface RealmTheme {
+  borderRadius: number;
+  color: any;
+  siteWidth: number;
+  spacing: Record<number, number>;
+  topBarSize: number;
+  card: { background: string };
+  mediaQueries: MediaQueries;
+  breakpoints: Breakpoints;
+}
+
+const theme: RealmTheme = {
   borderRadius: 12,
   color: {
     black,
@@ -8,13 +21,18 @@ const theme = {
     purple,
     primary: {
       light: red[200],
-      main: red[500],
+      main: baseColors.primary,
     },
     secondary: {
       main: teal[200],
     },
     white,
     teal,
+    priceColors: {
+      primary: baseColors.pricePrimary,
+      secondary: baseColors.priceSecondary,
+      tertiary: baseColors.priceTertiary,
+    },
   },
   siteWidth: 1200,
   spacing: {
@@ -26,7 +44,12 @@ const theme = {
     6: 48,
     7: 64,
   },
-  topBarSize: 72
-}
+  topBarSize: 72,
+  card: {
+    background: baseColors.cardBackground,
+  },
+  mediaQueries,
+  breakpoints,
+};
 
-export default theme
+export default theme;

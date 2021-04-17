@@ -1,25 +1,20 @@
 import React from 'react';
 
-import bacLogo from '../../assets/img/basis-cash-logo.svg';
-import basLogo from '../../assets/img/basis-share-logo.svg';
-import babLogo from '../../assets/img/basis-bond-logo.svg';
-import yCRVLogo from '../../assets/img/ycrv.png';
-import DAILogo from '../../assets/img/DAI.png';
-import sUSDLogo from '../../assets/img/sUSD.png';
 import USDCLogo from '../../assets/img/USDC.png';
 import USDTLogo from '../../assets/img/USDT.png';
+import PeonsLogo from '../../assets/img/peons-logo.svg';
+import NoblesLogo from '../../assets/img/nobles-logo.svg';
+import ExiledLogo from '../../assets/img/exiled-logo.svg';
 
 const logosBySymbol: {[title: string]: string} = {
-  'BAC': bacLogo,
-  'BAB': babLogo,
-  'BAS': basLogo,
-  'yCRV': yCRVLogo,
-  'DAI': DAILogo,
-  'SUSD': sUSDLogo,
+  'PEONS': PeonsLogo,
+  'NOBLES': NoblesLogo,
+  'EXILED': ExiledLogo,
   'USDC': USDCLogo,
   'USDT': USDTLogo,
-  'BAC_DAI-UNI-LPv2': bacLogo,
-  'BAS_DAI-UNI-LPv2': basLogo,
+  // TODO: Replace with actual logos
+  'PEONS-BUSD-CAKE-LP': PeonsLogo,
+  'NOBLES-BUSD-CAKE-LP': PeonsLogo,
 };
 
 type BasisLogoProps = {
@@ -29,7 +24,7 @@ type BasisLogoProps = {
 
 const TokenSymbol: React.FC<BasisLogoProps> = ({ symbol, size = 64 }) => {
   if (!logosBySymbol[symbol]) {
-    throw new Error(`Invalid BasisLogo symbol: ${symbol}`);
+    throw new Error(`Invalid symbol: ${symbol}`);
   }
   return (
     <img
