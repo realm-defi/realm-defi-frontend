@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { Bank } from '../../basis-cash';
+import { Bank } from '../../realm-defi';
 
 export interface BanksContext {
   banks: Bank[];

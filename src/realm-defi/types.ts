@@ -1,7 +1,11 @@
 import ERC20 from './ERC20';
 
 export type ContractName = string;
-
+export interface Address {
+  31337?: string
+  97?: string
+  56: string
+}
 export interface BankInfo {
   name: string;
   contract: ContractName;
@@ -18,7 +22,7 @@ export interface Bank extends  BankInfo {
 }
 
 export type TokenStat = {
-  priceInDAI: string;
+  priceInBusd: string;
   totalSupply: string;
 };
 

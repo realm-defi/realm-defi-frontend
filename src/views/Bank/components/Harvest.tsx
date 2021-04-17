@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Contract } from 'ethers';
-
 import Button from '../../../components/Button';
 import Card from '../../../components/Card';
 import CardContent from '../../../components/CardContent';
@@ -15,7 +13,7 @@ import useHarvest from '../../../hooks/useHarvest';
 
 import { getDisplayBalance } from '../../../utils/formatBalance';
 import TokenSymbol from '../../../components/TokenSymbol';
-import { Bank } from '../../../basis-cash';
+import { Bank } from '../../../realm-defi';
 
 interface HarvestProps {
   bank: Bank;
@@ -58,10 +56,6 @@ const StyledCardActions = styled.div`
   width: 100%;
 `;
 
-const StyledSpacer = styled.div`
-  height: ${(props) => props.theme.spacing[4]}px;
-  width: ${(props) => props.theme.spacing[4]}px;
-`;
 
 const StyledCardContentInner = styled.div`
   align-items: center;

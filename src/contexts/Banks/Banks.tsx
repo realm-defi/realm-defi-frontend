@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Context from './context';
 import useBasisCash from '../../hooks/useBasisCash';
-import { Bank } from '../../basis-cash';
+import { Bank } from '../../realm-defi';
 import config, { bankDefinitions } from '../../config';
 
 const Banks: React.FC = ({ children }) => {
@@ -25,7 +25,7 @@ const Banks: React.FC = ({ children }) => {
         ...bankInfo,
         address: config.deployments[bankInfo.contract].address,
         depositToken: basisCash.externalTokens[bankInfo.depositTokenName],
-        earnToken: bankInfo.earnTokenName == 'BAC' ? basisCash.BAC : basisCash.BAS,
+        earnToken: bankInfo.earnTokenName === 'PEONS' ? basisCash.PEONS : basisCash.NOBLES,
       });
     }
     banks.sort((a, b) => (a.sort > b.sort ? 1 : -1));

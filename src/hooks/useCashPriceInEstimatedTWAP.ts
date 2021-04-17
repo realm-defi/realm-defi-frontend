@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import useBasisCash from './useBasisCash';
-import { TokenStat } from '../basis-cash/types';
+import { TokenStat } from '../realm-defi/types';
 import config from '../config';
 
 const useCashPriceInEstimatedTWAP = () => {
@@ -12,10 +12,10 @@ const useCashPriceInEstimatedTWAP = () => {
   }, [basisCash]);
 
   useEffect(() => {
-    fetchCashPrice().catch((err) => console.error(`Failed to fetch BAB price: ${err.stack}`));
+    fetchCashPrice().catch((err) => console.error(`Failed to fetch EXILED price: ${err.stack}`));
     const refreshInterval = setInterval(fetchCashPrice, config.refreshInterval);
     return () => clearInterval(refreshInterval);
-  }, [setStat, basisCash]);
+  }, [setStat, basisCash, fetchCashPrice]);
 
   return stat;
 };

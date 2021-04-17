@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import useBasisCash from './useBasisCash';
-import config from '../config';
-import { TreasuryAllocationTime } from '../basis-cash/types';
+import { TreasuryAllocationTime } from '../realm-defi/types';
 
 const useTreasuryAllocationTimes = () => {
   const [time, setTime] = useState<TreasuryAllocationTime>({

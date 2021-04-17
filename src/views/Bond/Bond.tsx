@@ -17,7 +17,7 @@ import LaunchCountdown from '../../components/LaunchCountdown';
 import ExchangeStat from './components/ExchangeStat';
 import useTokenBalance from '../../hooks/useTokenBalance';
 import { getDisplayBalance } from '../../utils/formatBalance';
-import { BOND_REDEEM_PRICE, BOND_REDEEM_PRICE_BN } from '../../basis-cash/constants';
+import { BOND_REDEEM_PRICE, BOND_REDEEM_PRICE_BN } from '../../realm-defi/constants';
 
 const Bond: React.FC = () => {
   const { path } = useRouteMatch();
@@ -27,7 +27,7 @@ const Bond: React.FC = () => {
   const bondStat = useBondStats();
   const cashPrice = useBondOraclePriceInLastTWAP();
 
-  const bondBalance = useTokenBalance(basisCash?.BAB);
+  const bondBalance = useTokenBalance(basisCash?.EXILED);
 
   const handleBuyBonds = useCallback(
     async (amount: string) => {
@@ -48,7 +48,7 @@ const Bond: React.FC = () => {
     [basisCash, addTransaction],
   );
   const isBondRedeemable = useMemo(() => cashPrice.gt(BOND_REDEEM_PRICE_BN), [cashPrice]);
-  const isBondPurchasable = useMemo(() => Number(bondStat?.priceInDAI) < 1.0, [bondStat]);
+  const isBondPurchasable = useMemo(() => Number(bondStat?.priceInBusd) < 1.0, [bondStat]);
 
   const isLaunched = Date.now() >= config.bondLaunchesAt.getTime();
   if (!isLaunched) {
@@ -85,15 +85,15 @@ const Bond: React.FC = () => {
               <StyledCardWrapper>
                 <ExchangeCard
                   action="Purchase"
-                  fromToken={basisCash.BAC}
+                  fromToken={basisCash.PEONS}
                   fromTokenName="Basis Cash"
-                  toToken={basisCash.BAB}
+                  toToken={basisCash.EXILED}
                   toTokenName="Basis Bond"
                   priceDesc={
                     !isBondPurchasable
                       ? 'BAC is over $1'
                       : `${Math.floor(
-                          100 / Number(bondStat.priceInDAI) - 100,
+                          100 / Number(bondStat.priceInBusd) - 100,
                         )}% return when BAC > $1`
                   }
                   onExchange={handleBuyBonds}
@@ -110,15 +110,15 @@ const Bond: React.FC = () => {
                 <ExchangeStat
                   tokenName="BAB"
                   description="Current Price: (BAC)^2"
-                  price={bondStat?.priceInDAI || '-'}
+                  price={bondStat?.priceInBusd || '-'}
                 />
               </StyledStatsWrapper>
               <StyledCardWrapper>
                 <ExchangeCard
                   action="Redeem"
-                  fromToken={basisCash.BAB}
+                  fromToken={basisCash.EXILED}
                   fromTokenName="Basis Bond"
-                  toToken={basisCash.BAC}
+                  toToken={basisCash.PEONS}
                   toTokenName="Basis Cash"
                   priceDesc={`${getDisplayBalance(bondBalance)} BAB Available`}
                   onExchange={handleRedeemBonds}

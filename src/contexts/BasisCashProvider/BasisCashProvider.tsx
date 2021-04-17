@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { useWallet } from 'use-wallet';
-import BasisCash from '../../basis-cash';
+import BasisCash from '../../realm-defi';
 import config from '../../config';
 
 export interface BasisCashContext {
@@ -24,7 +24,7 @@ export const BasisCashProvider: React.FC = ({ children }) => {
     } else if (account) {
       basisCash.unlockWallet(ethereum, account);
     }
-  }, [account]);
+  }, [account, basisCash, ethereum]);
 
   return <Context.Provider value={{ basisCash }}>{children}</Context.Provider>;
 };

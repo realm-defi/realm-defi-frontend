@@ -1,8 +1,7 @@
 import { Deployments } from './deployments';
-import { ChainId } from '@uniswap/sdk';
 
 export type Configuration = {
-  chainId: ChainId,
+  chainId: 56 | 96 | 31337,
   etherscanUrl: string,
   defaultProvider: string,
   deployments: Deployments,

@@ -1,4 +1,4 @@
-import { Fetcher, Route, Token } from '@uniswap/sdk';
+import { Fetcher, Route, Token } from '@uniswap/v2-sdk';
 import { Configuration } from './config';
 import { ContractName, TokenStat, TreasuryAllocationTime } from './types';
 import { BigNumber, Contract, ethers, Overrides } from 'ethers';
@@ -10,7 +10,7 @@ import { getDefaultProvider } from '../utils/provider';
 import IUniswapV2PairABI from './IUniswapV2Pair.abi.json';
 
 /**
- * An API module of Basis Cash contracts.
+ * An API module of REALM contracts.
  * All contract-interacting domain logic should be defined in here.
  */
 export class BasisCash {
@@ -22,10 +22,10 @@ export class BasisCash {
   externalTokens: { [name: string]: ERC20 };
   boardroomVersionOfUser?: string;
 
-  bacDai: Contract;
-  BAC: ERC20;
-  BAS: ERC20;
-  BAB: ERC20;
+  peonsBusd: Contract;
+  PEONS: ERC20;
+  NOBLES: ERC20;
+  EXILED: ERC20;
 
   constructor(cfg: Configuration) {
     const { deployments, externalTokens } = cfg;
@@ -40,13 +40,13 @@ export class BasisCash {
     for (const [symbol, [address, decimal]] of Object.entries(externalTokens)) {
       this.externalTokens[symbol] = new ERC20(address, provider, symbol, decimal); // TODO: add decimal
     }
-    this.BAC = new ERC20(deployments.Cash.address, provider, 'BAC');
-    this.BAS = new ERC20(deployments.Share.address, provider, 'BAS');
-    this.BAB = new ERC20(deployments.Bond.address, provider, 'BAB');
+    this.PEONS = new ERC20(deployments.Peon.address, provider, 'PEONS');
+    this.NOBLES = new ERC20(deployments.Nobles.address, provider, 'NOBLES');
+    this.EXILED = new ERC20(deployments.Exiled.address, provider, 'EXILED');
 
     // Uniswap V2 Pair
-    this.bacDai = new Contract(
-      externalTokens['BAC_DAI-UNI-LPv2'][0],
+    this.peonsBusd = new Contract(
+      externalTokens['PEONS-BUSD-CAKE-LP'][0],
       IUniswapV2PairABI,
       provider,
     );
@@ -67,11 +67,11 @@ export class BasisCash {
     for (const [name, contract] of Object.entries(this.contracts)) {
       this.contracts[name] = contract.connect(this.signer);
     }
-    const tokens = [this.BAC, this.BAS, this.BAB, ...Object.values(this.externalTokens)];
+    const tokens = [this.PEONS, this.NOBLES, this.EXILED, ...Object.values(this.externalTokens)];
     for (const token of tokens) {
       token.connect(this.signer);
     }
-    this.bacDai = this.bacDai.connect(this.signer);
+    this.peonsBusd = this.peonsBusd.connect(this.signer);
     console.log(`🔓 Wallet is unlocked. Welcome, ${account}!`);
     this.fetchBoardroomVersionOfUser()
       .then((version) => (this.boardroomVersionOfUser = version))
@@ -94,32 +94,32 @@ export class BasisCash {
   }
 
   /**
-   * @returns Basis Cash (BAC) stats from Uniswap.
-   * It may differ from the BAC price used on Treasury (which is calculated in TWAP)
+   * @returns Cash (PEONS) stats from Uniswap.
+   * It may differ from the PEONS price used on Treasury (which is calculated in TWAP)
    */
   async getCashStatFromUniswap(): Promise<TokenStat> {
-    const supply = await this.BAC.displayedTotalSupply();
+    const supply = await this.PEONS.displayedTotalSupply();
     return {
-      priceInDAI: await this.getTokenPriceFromUniswap(this.BAC),
+      priceInBusd: await this.getTokenPriceFromUniswap(this.PEONS),
       totalSupply: supply,
     };
   }
 
   /**
-   * @returns Estimated Basis Cash (BAC) price data,
+   * @returns Estimated Cash (PEONS) price data,
    * calculated by 1-day Time-Weight Averaged Price (TWAP).
    */
   async getCashStatInEstimatedTWAP(): Promise<TokenStat> {
-    const { SeigniorageOracle } = this.contracts;
+    const { OracleSinglePair } = this.contracts;
 
-    const expectedPrice = await SeigniorageOracle.expectedPrice(
-      this.BAC.address,
+    const expectedPrice = await OracleSinglePair.expectedPrice(
+      this.PEONS.address,
       ethers.utils.parseEther('1'),
     );
-    const supply = await this.BAC.displayedTotalSupply();
+    const supply = await this.PEONS.displayedTotalSupply();
 
     return {
-      priceInDAI: getDisplayBalance(expectedPrice),
+      priceInBusd: getDisplayBalance(expectedPrice),
       totalSupply: supply,
     };
   }
@@ -131,7 +131,7 @@ export class BasisCash {
 
   async getBondOraclePriceInLastTWAP(): Promise<BigNumber> {
     const { Treasury } = this.contracts;
-    return Treasury.getBondOraclePrice();
+    return Treasury.getPeonPrice();
   }
 
   async getBondStat(): Promise<TokenStat> {
@@ -141,15 +141,15 @@ export class BasisCash {
     const bondPrice = cashPrice.pow(2).div(decimals);
 
     return {
-      priceInDAI: getDisplayBalance(bondPrice),
-      totalSupply: await this.BAB.displayedTotalSupply(),
+      priceInBusd: getDisplayBalance(bondPrice),
+      totalSupply: await this.EXILED.displayedTotalSupply(),
     };
   }
 
   async getShareStat(): Promise<TokenStat> {
     return {
-      priceInDAI: await this.getTokenPriceFromUniswap(this.BAS),
-      totalSupply: await this.BAS.displayedTotalSupply(),
+      priceInBusd: await this.getTokenPriceFromUniswap(this.NOBLES),
+      totalSupply: await this.NOBLES.displayedTotalSupply(),
     };
   }
 
@@ -157,15 +157,15 @@ export class BasisCash {
     await this.provider.ready;
 
     const { chainId } = this.config;
-    const { DAI } = this.config.externalTokens;
+    const { BUSD } = this.config.externalTokens;
 
-    const dai = new Token(chainId, DAI[0], 18);
+    const busd = new Token(chainId, BUSD[0], 18);
     const token = new Token(chainId, tokenContract.address, 18);
 
     try {
-      const daiToToken = await Fetcher.fetchPairData(dai, token, this.provider);
-      const priceInDAI = new Route([daiToToken], token);
-      return priceInDAI.midPrice.toSignificant(3);
+      const busdToToken = await Fetcher.fetchPairData(busd, token, this.provider);
+      const priceInBusd = new Route([busdToToken], token);
+      return priceInBusd.midPrice.toSignificant(3);
     } catch (err) {
       console.error(`Failed to fetch token price of ${tokenContract.symbol}: ${err}`);
     }
@@ -257,25 +257,12 @@ export class BasisCash {
     return await pool.exit(this.gasOptions(gas));
   }
 
+  // TODO: Remove this shit
   async fetchBoardroomVersionOfUser(): Promise<string> {
-    const { Boardroom1, Boardroom2 } = this.contracts;
-    const balance1 = await Boardroom1.getShareOf(this.myAccount);
-    if (balance1.gt(0)) {
-      console.log(
-        `👀 The user is using Boardroom v1. (Staked ${getDisplayBalance(balance1)} BAS)`,
-      );
-      return 'v1';
-    }
-    const balance2 = await Boardroom2.balanceOf(this.myAccount);
-    if (balance2.gt(0)) {
-      console.log(
-        `👀 The user is using Boardroom v2. (Staked ${getDisplayBalance(balance2)} BAS)`,
-      );
-      return 'v2';
-    }
     return 'latest';
   }
 
+  // TODO: Remove this shit
   boardroomByVersion(version: string): Contract {
     if (version === 'v1') {
       return this.contracts.Boardroom1;
@@ -283,7 +270,7 @@ export class BasisCash {
     if (version === 'v2') {
       return this.contracts.Boardroom2;
     }
-    return this.contracts.Boardroom3;
+    return this.contracts.Court;
   }
 
   currentBoardroom(): Contract {
@@ -298,8 +285,9 @@ export class BasisCash {
   }
 
   async stakeShareToBoardroom(amount: string): Promise<TransactionResponse> {
+    // TODO: Remove this shit
     if (this.isOldBoardroomMember()) {
-      throw new Error("you're using old Boardroom. please withdraw and deposit the BAS again.");
+      throw new Error("you're using old Boardroom. please withdraw and deposit the NOBLES again.");
     }
     const Boardroom = this.currentBoardroom();
     return await Boardroom.stake(decimalToBalance(amount));

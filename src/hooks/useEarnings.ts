@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BigNumber } from 'ethers';
 import useBasisCash from './useBasisCash';
-import { ContractName } from '../basis-cash';
+import { ContractName } from '../realm-defi';
 import config from '../config';
 
 const useEarnings = (poolName: ContractName) => {

@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import useTokenBalance from '../../../hooks/useTokenBalance';
 import { getDisplayBalance } from '../../../utils/formatBalance';
 
-import Button from '../../Button';
 import Label from '../../Label';
 import Modal, { ModalProps } from '../../Modal';
 import ModalTitle from '../../ModalTitle';
@@ -13,14 +12,14 @@ import TokenSymbol from '../../TokenSymbol';
 const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
   const basisCash = useBasisCash();
 
-  const bacBalance = useTokenBalance(basisCash.BAC);
-  const displayBacBalance = useMemo(() => getDisplayBalance(bacBalance), [bacBalance]);
+  const peonsBalance = useTokenBalance(basisCash.PEONS);
+  const displayBacBalance = useMemo(() => getDisplayBalance(peonsBalance), [peonsBalance]);
 
-  const basBalance = useTokenBalance(basisCash.BAS);
-  const displayBasBalance = useMemo(() => getDisplayBalance(basBalance), [basBalance]);
+  const noblesBalance = useTokenBalance(basisCash.NOBLES);
+  const displayBasBalance = useMemo(() => getDisplayBalance(noblesBalance), [noblesBalance]);
 
-  const babBalance = useTokenBalance(basisCash.BAB);
-  const displayBabBalance = useMemo(() => getDisplayBalance(babBalance), [babBalance]);
+  const exiledBalance = useTokenBalance(basisCash.EXILED);
+  const displayBabBalance = useMemo(() => getDisplayBalance(exiledBalance), [exiledBalance]);
 
   return (
     <Modal>
@@ -28,26 +27,26 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
 
       <Balances>
         <StyledBalanceWrapper>
-          <TokenSymbol symbol="BAC" />
+          <TokenSymbol symbol="PEONS" />
           <StyledBalance>
             <StyledValue>{displayBacBalance}</StyledValue>
-            <Label text="BAC Available" />
+            <Label text="PEONS Available" />
           </StyledBalance>
         </StyledBalanceWrapper>
 
         <StyledBalanceWrapper>
-          <TokenSymbol symbol="BAS" />
+          <TokenSymbol symbol="NOBLES" />
           <StyledBalance>
             <StyledValue>{displayBasBalance}</StyledValue>
-            <Label text="BAS Available" />
+            <Label text="NOBLES Available" />
           </StyledBalance>
         </StyledBalanceWrapper>
 
         <StyledBalanceWrapper>
-          <TokenSymbol symbol="BAB" />
+          <TokenSymbol symbol="EXILED" />
           <StyledBalance>
             <StyledValue>{displayBabBalance}</StyledValue>
-            <Label text="BAB Available" />
+            <Label text="EXILED Available" />
           </StyledBalance>
         </StyledBalanceWrapper>
       </Balances>

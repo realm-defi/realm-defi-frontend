@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import useBasisCash from './useBasisCash';
-import { Bank } from '../basis-cash';
+import { Bank } from '../realm-defi';
 import useHandleTransactionReceipt from './useHandleTransactionReceipt';
 
 const useRedeem = (bank: Bank) => {
