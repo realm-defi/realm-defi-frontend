@@ -7,81 +7,83 @@ import HomeCard from './components/HomeCard';
 import { OverviewData } from './types';
 import useBasisCash from '../../hooks/useBasisCash';
 import config from '../../config';
-import Notice from '../../components/Notice';
+import theme from '../../theme';
 
 const Home: React.FC = () => {
+  // TODO: remove all instances of basisCash
   const basisCash = useBasisCash();
 
   const [{ cash, bond, share }, setStats] = useState<OverviewData>({});
   const fetchStats = useCallback(async () => {
-    const [cash, bond, share] = await Promise.all([
-      basisCash.getCashStatFromUniswap(),
-      basisCash.getBondStat(),
-      basisCash.getShareStat(),
-    ]);
-    if (Date.now() < config.bondLaunchesAt.getTime()) {
-      bond.priceInDAI = '-';
+    try {
+      const [cash, bond, share] = await Promise.all([
+        basisCash.getCashStatFromUniswap(),
+        basisCash.getBondStat(),
+        basisCash.getShareStat(),
+      ]);
+      if (Date.now() < config.bondLaunchesAt.getTime()) {
+        bond.priceInBusd = '-';
+      }
+      setStats({ cash, bond, share });
+    } catch (e) {
+      console.error(e);
     }
-    setStats({ cash, bond, share });
   }, [basisCash, setStats]);
 
   useEffect(() => {
     if (basisCash) {
       fetchStats().catch((err) => console.error(err.stack));
     }
-  }, [basisCash]);
+  }, [basisCash, fetchStats]);
 
-  const cashAddr = useMemo(() => basisCash?.BAC.address, [basisCash]);
-  const shareAddr = useMemo(() => basisCash?.BAS.address, [basisCash]);
-  const bondAddr = useMemo(() => basisCash?.BAB.address, [basisCash]);
+  const cashAddr = useMemo(() => basisCash?.PEONS.address, [basisCash]);
+  const shareAddr = useMemo(() => basisCash?.NOBLES.address, [basisCash]);
+  const bondAddr = useMemo(() => basisCash?.EXILED.address, [basisCash]);
+
+  const {
+    color: { primary },
+  } = theme;
 
   return (
     <Page>
       <PageHeader
         icon="👋"
-        subtitle="Buy, sell, and provide liquidity for Basis Cash and Basis Shares on Uniswap"
-        title="Welcome to Basis Cash!"
+        subtitle="The Realm Protocol is an algorithmic stablecoing running on Binance Smart Chain (BSC)."
+        title="Welcome to Realm!"
       />
       <Spacer size="md" />
       <CardWrapper>
         <HomeCard
-          title="Basis Cash"
-          symbol="BAC"
-          color="#EEA7ED"
-          supplyLabel="Circulating Supply"
+          title="PEONS"
+          symbol="PEONS"
+          color={primary.main}
           address={cashAddr}
           stat={cash}
+          variant="peons"
         />
         <Spacer size="lg" />
         <HomeCard
-          title="Basis Share"
-          symbol="BAS"
-          color="#E83725"
+          title="NOBLES"
+          symbol="NOBLES"
+          color={primary.main}
           address={shareAddr}
           stat={share}
+          largeSize={true}
+          variant="nobles"
         />
         <Spacer size="lg" />
         <HomeCard
-          title="Basis Bond"
-          symbol="BAB"
-          color="#ECF25C"
+          title="EXILED"
+          symbol="EXILED"
+          color={primary.main}
           address={bondAddr}
           stat={bond}
+          variant="exiled"
         />
       </CardWrapper>
     </Page>
   );
 };
-
-const StyledOverview = styled.div`
-  align-items: center;
-  display: flex;
-  @media (max-width: 768px) {
-    width: 100%;
-    flex-flow: column nowrap;
-    align-items: center;
-  }
-`;
 
 const CardWrapper = styled.div`
   display: flex;
@@ -93,22 +95,6 @@ const CardWrapper = styled.div`
     flex-flow: column nowrap;
     align-items: center;
   }
-`;
-
-const StyledNoticeContainer = styled.div`
-  max-width: 768px;
-  width: 90vw;
-`;
-
-const StyledSpacer = styled.div`
-  height: ${(props) => props.theme.spacing[4]}px;
-  width: ${(props) => props.theme.spacing[4]}px;
-`;
-
-const StyledLink = styled.a`
-  font-weight: 700;
-  text-decoration: none;
-  color: ${(props) => props.theme.color.primary.main};
 `;
 
 export default Home;
