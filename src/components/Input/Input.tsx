@@ -7,6 +7,7 @@ export interface InputProps {
   placeholder?: string,
   startAdornment?: React.ReactNode,
   value: string,
+  size?: number
 }
 
 const Input: React.FC<InputProps> = ({
@@ -15,11 +16,12 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   startAdornment,
   value,
+  size
 }) => {
   return (
     <StyledInputWrapper>
       {!!startAdornment && startAdornment}
-      <StyledInput placeholder={placeholder} value={value} onChange={onChange} />
+      <StyledInput placeholder={placeholder} value={value} onChange={onChange} size={size} />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>
   )
@@ -33,13 +35,14 @@ const StyledInputWrapper = styled.div`
   padding: 0 ${props => props.theme.spacing[3]}px;
 `
 
-const StyledInput = styled.input`
+const StyledInput = styled.input<{size: number}>`
   background: none;
   border: 0;
   color: ${props => props.theme.color.grey[600]};
   font-size: 18px;
   flex: 1;
-  height: 56px;
+  height: 40px;
+  ${({size}) => size ? `width: ${size}px`: ''};
   margin: 0;
   padding: 0;
   outline: none;

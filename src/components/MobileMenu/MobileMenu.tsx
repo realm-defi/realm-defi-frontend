@@ -3,6 +3,8 @@ import styled, {ThemeContext} from 'styled-components'
 import { slide as Menu } from 'react-burger-menu'
 import { NavLink } from 'react-router-dom'
 
+import AccountButton from '../TopBar/components/AccountButton'
+
 const MobileMenu: React.FC = () => {
   const theme = useContext(ThemeContext)
 
@@ -65,6 +67,7 @@ const MobileMenu: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/archives">Archives</StyledLink>
       {/* TODO: Change to real voting page */}
       <StyledLink2 href="https://snapshot.page/#/basiscash.eth" target="_blank" >Vote</StyledLink2>
+      <AccountButton />
       </Menu>
   )
 }

@@ -8,15 +8,16 @@ import BanksProvider from './contexts/Banks';
 import BasisCashProvider from './contexts/BasisCashProvider';
 import ModalsProvider from './contexts/Modals';
 
-import Banks from './views/Banks';
+// import Banks from './views/Banks';
 import Home from './views/Home';
+import Farms from './views/Farms';
+import Boardroom from './views/Boardroom';
 import Bond from './views/Bond';
 
 import store from './state';
 import theme from './theme';
 import config from './config';
 import Updaters from './state/Updaters';
-import Boardroom from './views/Boardroom';
 import Popups from './components/Popups';
 
 const App: React.FC = () => {
@@ -27,13 +28,13 @@ const App: React.FC = () => {
           <Route path="/" exact>
             <Home />
           </Route>
-          <Route path="/bank">
-            <Banks />
+          <Route path="/farms">
+            <Farms />
           </Route>
           <Route path="/bonds">
             <Bond />
           </Route>
-          <Route path="/boardroom">
+          <Route path="/courtroom">
             <Boardroom />
           </Route>
         </Switch>

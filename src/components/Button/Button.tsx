@@ -8,7 +8,7 @@ interface ButtonProps {
   disabled?: boolean;
   href?: string;
   onClick?: () => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   text?: string;
   to?: string;
   variant?: 'default' | 'secondary' | 'tertiary' | 'nobles' | 'peons' | 'exiled';
@@ -62,6 +62,11 @@ const Button: React.FC<ButtonProps> = ({
   let buttonPadding: number;
   let fontSize: number;
   switch (size) {
+    case 'xs': 
+      buttonPadding = spacing[2];
+      buttonSize = 32;
+      fontSize = 14;
+      break;
     case 'sm':
       buttonPadding = spacing[3];
       buttonSize = 36;
@@ -142,7 +147,7 @@ const StyledButton = styled.button<StyledButtonProps>`
   padding-left: ${(props) => props.padding}px;
   padding-right: ${(props) => props.padding}px;
   /* pointer-events: ${(props) => (!props.disabled ? undefined : 'none')}; */
-  width: 100%;
+  width: max-content;
   
   &:hover {
     opacity: 0.8;

@@ -36,7 +36,7 @@ const TransactionState = styled.a<{ pending: boolean; success?: boolean }>`
 
 const IconWrapper = styled.div<{ pending: boolean; success?: boolean }>`
   color: ${({ pending, success, theme }) =>
-    pending ? theme.color.primary.main : success ? theme.color.green : theme.color.red1};
+    pending ? theme.color.primary.main : success ? theme.color.green : theme.color.red[500]};
 `;
 
 interface TransactionProps {
