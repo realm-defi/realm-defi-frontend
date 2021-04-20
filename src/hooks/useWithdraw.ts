@@ -11,12 +11,13 @@ const useWithdraw = (bank: Bank) => {
   const handleWithdraw = useCallback(
     (amount: string) => {
       const amountBn = parseUnits(amount, bank.depositToken.decimal);
+      // const uintPid = parseUnits(bank.pid.toString(), bank.depositToken.decimal)
       handleTransactionReceipt(
-        basisCash.unstake(bank.contract, amountBn),
+        basisCash.unstake(bank.contract, amountBn, bank.pid),
         `Withdraw ${amount} ${bank.depositTokenName} from ${bank.contract}`,
       );
     },
-    [bank, basisCash],
+    [bank.contract, bank.depositToken.decimal, bank.depositTokenName, bank.pid, basisCash, handleTransactionReceipt],
   );
   return { onWithdraw: handleWithdraw };
 };

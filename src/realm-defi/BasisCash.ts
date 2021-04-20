@@ -195,7 +195,7 @@ export class BasisCash {
   async earnedFromBank(poolName: ContractName, account = this.myAccount): Promise<BigNumber> {
     const pool = this.contracts[poolName];
     try {
-      return await pool.earned(account);
+      return await pool.pendingRewards(account);
     } catch (err) {
       console.error(`Failed to call earned() on pool ${pool.address}: ${err.stack}`);
       return BigNumber.from(0);
@@ -205,10 +205,11 @@ export class BasisCash {
   async stakedBalanceOnBank(
     poolName: ContractName,
     account = this.myAccount,
+    pid: number
   ): Promise<BigNumber> {
     const pool = this.contracts[poolName];
     try {
-      return await pool.balanceOf(account);
+      return await pool.balanceOf(pid, account);
     } catch (err) {
       console.error(`Failed to call balanceOf() on pool ${pool.address}: ${err.stack}`);
       return BigNumber.from(0);
@@ -221,10 +222,12 @@ export class BasisCash {
    * @param amount Number of tokens with decimals applied. (e.g. 1.45 DAI * 10^18)
    * @returns {string} Transaction hash
    */
-  async stake(poolName: ContractName, amount: BigNumber): Promise<TransactionResponse> {
+  async stake(poolName: ContractName, amount: BigNumber, pid: BigNumber): Promise<TransactionResponse> {
     const pool = this.contracts[poolName];
-    const gas = await pool.estimateGas.stake(amount);
-    return await pool.stake(amount, this.gasOptions(gas));
+    // TODO: update to correct parameters for the deposit function
+    const gas = await pool.estimateGas.deposit(pid, amount);
+    // return await pool.deposit(amount, this.gasOptions(gas));
+    return await pool.deposit(pid, amount, this.gasOptions(gas));
   }
 
   /**
@@ -233,10 +236,11 @@ export class BasisCash {
    * @param amount Number of tokens with decimals applied. (e.g. 1.45 DAI * 10^18)
    * @returns {string} Transaction hash
    */
-  async unstake(poolName: ContractName, amount: BigNumber): Promise<TransactionResponse> {
+  async unstake(poolName: ContractName, amount: BigNumber, pid: number): Promise<TransactionResponse> {
     const pool = this.contracts[poolName];
-    const gas = await pool.estimateGas.withdraw(amount);
-    return await pool.withdraw(amount, this.gasOptions(gas));
+    // TODO: update to correct parameters for the withdraw function
+    const gas = await pool.estimateGas.withdraw(pid, amount);
+    return await pool.withdraw(pid, amount, this.gasOptions(gas));
   }
 
   /**
@@ -244,8 +248,9 @@ export class BasisCash {
    */
   async harvest(poolName: ContractName): Promise<TransactionResponse> {
     const pool = this.contracts[poolName];
-    const gas = await pool.estimateGas.getReward();
-    return await pool.getReward(this.gasOptions(gas));
+    // TODO: updated to correct harvest function
+    const gas = await pool.estimateGas.getGeneratedReward();
+    return await pool.getGeneratedReward(this.gasOptions(gas));
   }
 
   /**
@@ -253,6 +258,7 @@ export class BasisCash {
    */
   async exit(poolName: ContractName): Promise<TransactionResponse> {
     const pool = this.contracts[poolName];
+    // TODO: update to correct exit function
     const gas = await pool.estimateGas.exit();
     return await pool.exit(this.gasOptions(gas));
   }

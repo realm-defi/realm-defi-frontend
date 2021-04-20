@@ -7,6 +7,7 @@ export interface Address {
   56: string
 }
 export interface BankInfo {
+  pid: number;
   name: string;
   contract: ContractName;
   depositTokenName: ContractName;

@@ -11,12 +11,13 @@ const useStake = (bank: Bank) => {
   const handleStake = useCallback(
     (amount: string) => {
       const amountBn = parseUnits(amount, bank.depositToken.decimal);
+      const uintPid = parseUnits(bank.pid.toString(), bank.depositToken.decimal)
       handleTransactionReceipt(
-        basisCash.stake(bank.contract, amountBn),
+        basisCash.stake(bank.contract, amountBn, uintPid),
         `Stake ${amount} ${bank.depositTokenName} to ${bank.contract}`,
       );
     },
-    [bank, basisCash],
+    [bank.depositToken.decimal, bank.contract, bank.pid, bank.depositTokenName, handleTransactionReceipt, basisCash],
   );
   return { onStake: handleStake };
 };

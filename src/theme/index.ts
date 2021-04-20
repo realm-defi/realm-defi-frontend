@@ -1,4 +1,4 @@
-import { baseColors, black, purple, teal, grey, red, white } from './colors';
+import { baseColors, black, purple, teal, grey, red, white, green } from './colors';
 import { breakpoints, mediaQueries } from './mediaQueries';
 import { MediaQueries, Breakpoints, PriceColors } from './types';
 
@@ -10,6 +10,7 @@ interface Color {
   teal: Record<string, string>
   grey: Record<string, string>
   red?: Record<string, string>
+  green?: string
   primary: {
     light: string
     main: string
@@ -36,6 +37,8 @@ const theme: RealmTheme = {
     black,
     grey,
     purple,
+    green: green[500],
+    red,
     primary: {
       light: red[200],
       main: baseColors.primaryText,
