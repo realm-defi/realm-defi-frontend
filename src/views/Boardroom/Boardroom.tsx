@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useMemo, useContext, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 import { useWallet } from 'use-wallet';
 
 import Button from '../../components/Button';
@@ -7,23 +7,24 @@ import PageHeader from '../../components/PageHeader';
 import Spacer from '../../components/Spacer';
 import Harvest from './components/Harvest';
 import Stake from './components/Stake';
+import Timer from './components/Timer';
 import { Switch } from 'react-router-dom';
 import Page from '../../components/Page';
 import useRedeemOnBoardroom from '../../hooks/useRedeemOnBoardroom';
 import useStakedBalanceOnBoardroom from '../../hooks/useStakedBalanceOnBoardroom';
 
 import config from '../../config';
+import ValueCounter from '../../components/ValueCounter';
 import LaunchCountdown from '../../components/LaunchCountdown';
-import Stat from './components/Stat';
-import ProgressCountdown from './components/ProgressCountdown';
 import useCashPriceInEstimatedTWAP from '../../hooks/useCashPriceInEstimatedTWAP';
 import useTreasuryAmount from '../../hooks/useTreasuryAmount';
-import Humanize from 'humanize-plus';
-import { getBalance } from '../../utils/formatBalance';
+import useTotalStakedBalanceOnBoardroom from '../../hooks/useTotalStakedBalanceOnBoardroom';
+import useCourtroomPermission from '../../hooks/useCourtroomPermission';
+import { getBalance, getDisplayBalance } from '../../utils/formatBalance';
 import useTreasuryAllocationTimes from '../../hooks/useTreasuryAllocationTimes';
-import Notice from '../../components/Notice';
-import useBoardroomVersion from '../../hooks/useBoardroomVersion';
 import moment from 'moment';
+
+const countdownTimer = () => {};
 
 const Boardroom: React.FC = () => {
   useEffect(() => window.scrollTo(0, 0));
@@ -33,10 +34,9 @@ const Boardroom: React.FC = () => {
 
   const cashStat = useCashPriceInEstimatedTWAP();
   const treasuryAmount = useTreasuryAmount();
-  const scalingFactor = useMemo(
-    () => (cashStat ? Number(cashStat.priceInBusd).toFixed(2) : null),
-    [cashStat],
-  );
+  const totalStakedAmount = useTotalStakedBalanceOnBoardroom();
+  const { canWithdraw } = useCourtroomPermission();
+
   const { prevAllocation, nextAllocation } = useTreasuryAllocationTimes();
 
   const prevEpoch = useMemo(
@@ -47,25 +47,7 @@ const Boardroom: React.FC = () => {
     [prevAllocation, nextAllocation],
   );
   const nextEpoch = useMemo(() => moment(prevEpoch).add(1, 'days').toDate(), [prevEpoch]);
-
-  const boardroomVersion = useBoardroomVersion();
-  const usingOldBoardroom = boardroomVersion !== 'latest';
-  const migrateNotice = useMemo(() => {
-    if (boardroomVersion === 'v2') {
-      return (
-        <StyledNoticeWrapper>
-          <Notice color="green">
-            <b>Please Migrate into New Boardroom</b>
-            <br />
-            The boardroom upgrade was successful. Please settle and withdraw your stake from the
-            legacy boardroom, then stake again on the new boardroom contract{' '}
-            <b>to continue earning BAC seigniorage.</b>
-          </Notice>
-        </StyledNoticeWrapper>
-      );
-    }
-    return <></>;
-  }, [boardroomVersion]);
+  const { color } = useContext(ThemeContext);
 
   const isLaunched = Date.now() >= config.boardroomLaunchesAt.getTime();
   if (!isLaunched) {
@@ -97,32 +79,50 @@ const Boardroom: React.FC = () => {
               title="Join the Boardroom"
               subtitle="Deposit Basis Shares and earn inflationary rewards"
             />
-            {migrateNotice}
             <StyledHeader>
-              <ProgressCountdown
-                base={prevEpoch}
-                deadline={nextEpoch}
-                description="Next Epoch"
-              />
-              <Stat
-                icon="💵"
-                title={cashStat ? `$${cashStat.priceInBusd}` : '-'}
-                description="BAC Price (TWAP)"
-              />
-              <Stat
-                icon="🚀"
-                title={scalingFactor ? `x${scalingFactor}` : '-'}
-                description="Scaling Factor"
-              />
-              <Stat
-                icon="💰"
-                title={
-                  treasuryAmount
-                    ? `~$${Humanize.compactInteger(getBalance(treasuryAmount), 2)}`
-                    : '-'
-                }
-                description="Treasury Amount"
-              />
+              <StyledHeaderBox>
+                <Label variant="nobles">Nobles Locked</Label>
+                <Value>
+                  <ValueCounter color={color.primary.main} value={Number(getDisplayBalance(totalStakedAmount))} decimals={2} />
+                </Value>
+              </StyledHeaderBox>
+              <StyledHeaderBox>
+                <Label>EPOCH 186</Label>
+                <Timer />
+              </StyledHeaderBox>
+              <StyledHeaderBox>
+                <Label variant="peons">Value Locked</Label>
+                <Value>
+                  <ValueCounter
+                    color={color.primary.main}
+                    value={123432423}
+                    decimals={2}
+                    prefix="$"
+                  />
+                </Value>
+              </StyledHeaderBox>
+            </StyledHeader>
+            <StyledHeader>
+              <StyledInformationCard>
+                <LabelSmall>APR</LabelSmall>
+                <InformationCardValue>127432%</InformationCardValue>
+              </StyledInformationCard>
+              <StyledInformationCard>
+                <LabelSmall variant="peons">PEON TWAP</LabelSmall>
+                <InformationCardValue>
+                  {cashStat ? `$${cashStat.priceInBusd}` : '-'}
+                </InformationCardValue>
+              </StyledInformationCard>
+              <StyledInformationCard>
+                <LabelSmall>Expansion Rate</LabelSmall>
+                <InformationCardValue>3%</InformationCardValue>
+              </StyledInformationCard>
+              <StyledInformationCard>
+                <LabelSmall variant="nobles">DAO Funds</LabelSmall>
+                <InformationCardValue>
+                  {treasuryAmount ? `~$${getDisplayBalance(treasuryAmount, 18, 2)}` : '-'}
+                </InformationCardValue>
+              </StyledInformationCard>
             </StyledHeader>
             <StyledBoardroom>
               <StyledCardsWrapper>
@@ -135,19 +135,14 @@ const Boardroom: React.FC = () => {
                 </StyledCardWrapper>
               </StyledCardsWrapper>
               <Spacer size="lg" />
-              {!usingOldBoardroom && (
-                // for old boardroom users, the button is displayed in Stake component
-                <>
-                  <div>
-                    <Button
-                      disabled={stakedBalance.eq(0)}
-                      onClick={onRedeem}
-                      text="Settle & Withdraw"
-                    />
-                  </div>
-                  <Spacer size="lg" />
-                </>
-              )}
+              <div>
+                <Button
+                  disabled={stakedBalance.eq(0) || !canWithdraw}
+                  onClick={onRedeem}
+                  text="Settle & Withdraw"
+                />
+              </div>
+              <Spacer size="lg" />
             </StyledBoardroom>
           </>
         ) : (
@@ -177,33 +172,100 @@ const StyledBoardroom = styled.div`
 `;
 
 const StyledHeader = styled.div`
-  justify-content: center;
   display: flex;
-  flex-direction: row;
-  margin-bottom: ${(props) => props.theme.spacing[5]}px;
-  width: 960px;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 25px;
 
-  > * {
-    flex: 1;
-    height: 84px;
-    margin: 0 ${(props) => props.theme.spacing[2]}px;
-  }
-
-  @media (max-width: 768px) {
-    flex-direction: column;
+  ${({ theme }) => theme.mediaQueries.lg} {
+    flex-direction: row;
+    justify-content: center;
     width: 100%;
+    margin-bottom: 25px;
   }
 `;
 
-const StyledNoticeWrapper = styled.div`
-  width: 768px;
-  margin-top: -20px;
-  margin-bottom: 40px;
+const Label = styled.div<{ variant?: string }>`
+  background-color: ${({ theme, variant }) => {
+    switch (variant) {
+      case 'nobles':
+        return theme.color.priceColors.secondary;
+      case 'peons':
+        return theme.color.priceColors.peons;
+      default:
+        return theme.color.priceColors.primary;
+    }
+  }};
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: ${({ theme }) => theme.card.boxShadow};
+`;
+
+const LabelSmall = styled.span<{ variant?: string }>`
+  color: ${({ theme, variant }) => {
+    switch (variant) {
+      case 'nobles':
+        return theme.color.priceColors.secondary;
+      case 'peons':
+        return theme.color.priceColors.peons;
+      default:
+        return theme.color.priceColors.primary;
+    }
+  }};
+
+  font-size: 24px;
+  font-weight: bold;
+`;
+
+const Value = styled.div`
+  background-color: ${({ theme }) => theme.card.background};
+  padding: 10px 50px;
+  border-radius: 5px;
+`;
+
+const StyledHeaderBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 250px;
+  margin-right: 25px;
+  margin-bottom: 20px;
+
+  ${({ theme }) => theme.mediaQueries.lg} {
+    margin-bottom: unset;
+  }
+`;
+
+const StyledInformationCard = styled.div`
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: ${({ theme }) => theme.card.background};
+  padding: 10px 25px;
+  margin-right: 15px;
+  margin-bottom: 20px;
+
+  ${({ theme }) => theme.mediaQueries.lg} {
+    margin-bottom: unset;
+  }
+`;
+
+const InformationCardValue = styled.span`
+  font-size: 24px;
+  font-weight: bold;
+  color: ${({ theme }) => theme.color.primary.main};
 `;
 
 const StyledCardsWrapper = styled.div`
   display: flex;
-  width: 600px;
+  width: 100%;
   @media (max-width: 768px) {
     width: 100%;
     flex-flow: column nowrap;
@@ -215,7 +277,8 @@ const StyledCardWrapper = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  @media (max-width: 768px) {
+
+  ${({ theme }) => theme.mediaQueries.lg} {
     width: 80%;
   }
 `;
