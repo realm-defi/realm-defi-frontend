@@ -20,7 +20,6 @@ export class BasisCash {
   config: Configuration;
   contracts: { [name: string]: Contract };
   externalTokens: { [name: string]: ERC20 };
-  boardroomVersionOfUser?: string;
 
   peonsBusd: Contract;
   PEONS: ERC20;
@@ -73,12 +72,6 @@ export class BasisCash {
     }
     this.peonsBusd = this.peonsBusd.connect(this.signer);
     console.log(`🔓 Wallet is unlocked. Welcome, ${account}!`);
-    this.fetchBoardroomVersionOfUser()
-      .then((version) => (this.boardroomVersionOfUser = version))
-      .catch((err) => {
-        console.error(`Failed to fetch boardroom version: ${err.stack}`);
-        this.boardroomVersionOfUser = 'latest';
-      });
   }
 
   get isUnlocked(): boolean {
@@ -112,7 +105,7 @@ export class BasisCash {
   async getCashStatInEstimatedTWAP(): Promise<TokenStat> {
     const { OracleSinglePair } = this.contracts;
 
-    const expectedPrice = await OracleSinglePair.expectedPrice(
+    const expectedPrice = await OracleSinglePair.twap(
       this.PEONS.address,
       ethers.utils.parseEther('1'),
     );
@@ -264,11 +257,6 @@ export class BasisCash {
   }
 
   // TODO: Remove this shit
-  async fetchBoardroomVersionOfUser(): Promise<string> {
-    return 'latest';
-  }
-
-  // TODO: Remove this shit
   boardroomByVersion(version: string): Contract {
     if (version === 'v1') {
       return this.contracts.Boardroom1;
@@ -280,66 +268,57 @@ export class BasisCash {
   }
 
   currentBoardroom(): Contract {
-    if (!this.boardroomVersionOfUser) {
-      throw new Error('you must unlock the wallet to continue.');
-    }
-    return this.boardroomByVersion(this.boardroomVersionOfUser);
-  }
-
-  isOldBoardroomMember(): boolean {
-    return this.boardroomVersionOfUser !== 'latest';
+    return this.contracts.Court;
   }
 
   async stakeShareToBoardroom(amount: string): Promise<TransactionResponse> {
-    // TODO: Remove this shit
-    if (this.isOldBoardroomMember()) {
-      throw new Error("you're using old Boardroom. please withdraw and deposit the NOBLES again.");
-    }
-    const Boardroom = this.currentBoardroom();
+    const Boardroom = this.contracts.Court;
     return await Boardroom.stake(decimalToBalance(amount));
   }
 
   async getStakedSharesOnBoardroom(): Promise<BigNumber> {
-    const Boardroom = this.currentBoardroom();
-    if (this.boardroomVersionOfUser === 'v1') {
-      return await Boardroom.getShareOf(this.myAccount);
-    }
+    const Boardroom = this.contracts.Court;
     return await Boardroom.balanceOf(this.myAccount);
   }
 
   async getEarningsOnBoardroom(): Promise<BigNumber> {
-    const Boardroom = this.currentBoardroom();
-    if (this.boardroomVersionOfUser === 'v1') {
-      return await Boardroom.getCashEarningsOf(this.myAccount);
-    }
+    const Boardroom = this.contracts.Court;
     return await Boardroom.earned(this.myAccount);
   }
 
   async withdrawShareFromBoardroom(amount: string): Promise<TransactionResponse> {
-    const Boardroom = this.currentBoardroom();
+    const Boardroom = this.contracts.Court;
     return await Boardroom.withdraw(decimalToBalance(amount));
   }
 
   async harvestCashFromBoardroom(): Promise<TransactionResponse> {
-    const Boardroom = this.currentBoardroom();
-    if (this.boardroomVersionOfUser === 'v1') {
-      return await Boardroom.claimDividends();
-    }
+    const Boardroom = this.contracts.Court;
     return await Boardroom.claimReward();
   }
 
   async exitFromBoardroom(): Promise<TransactionResponse> {
-    const Boardroom = this.currentBoardroom();
+    const Boardroom = this.contracts.Court;
     return await Boardroom.exit();
   }
 
   async getTreasuryNextAllocationTime(): Promise<TreasuryAllocationTime> {
-    const { Treasury } = this.contracts;
-    const nextEpochTimestamp: BigNumber = await Treasury.nextEpochPoint();
-    const period: BigNumber = await Treasury.getPeriod();
+    // FIXME: This should probably be part of treasury not oracle
+    const { OracleSinglePair } = this.contracts;
+    const nextEpochTimestamp: BigNumber = await OracleSinglePair.nextEpochPoint();
+    const period: BigNumber = await OracleSinglePair.getPeriod();
 
     const nextAllocation = new Date(nextEpochTimestamp.mul(1000).toNumber());
     const prevAllocation = new Date(nextAllocation.getTime() - period.toNumber() * 1000);
     return { prevAllocation, nextAllocation };
+  }
+
+  async canClaimReward(): Promise<boolean> {
+    const Courtroom = this.contracts.Court;
+    return await Courtroom.canClaimReward()
+  }
+
+  async canWithdraw(): Promise<boolean> {
+    const Courtroom = this.contracts.Court;
+    return await Courtroom.canWithdraw()
   }
 }
