@@ -7,8 +7,8 @@ const Card: React.FC = ({ children }) => (
   </StyledCard>
 )
 
-const StyledCard = styled.div`
-  background-color: ${props => props.theme.color.grey[800]};
+export const StyledCard = styled.div`
+  background-color: ${props => props.theme.card.background};
   border: 1px solid ${props => props.theme.color.grey[900]};
   border-radius: 12px;
   box-shadow: inset 1px 1px 0px ${props => props.theme.color.grey[700]};
