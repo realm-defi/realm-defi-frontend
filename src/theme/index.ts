@@ -26,7 +26,7 @@ export interface RealmTheme {
   siteWidth: number;
   spacing: Record<number, number>;
   topBarSize: number;
-  card: { background: string };
+  card: { background: string, boxShadow: string };
   mediaQueries: MediaQueries;
   breakpoints: Breakpoints;
 }
@@ -44,7 +44,7 @@ const theme: RealmTheme = {
       main: baseColors.primaryText,
     },
     secondary: {
-      main: teal[200],
+      main: '#4376b7'
     },
     white,
     teal,
@@ -52,6 +52,7 @@ const theme: RealmTheme = {
       primary: baseColors.primary,
       secondary: baseColors.secondary,
       tertiary: baseColors.tertiary,
+      peons: baseColors.peons
     },
   },
   siteWidth: 1200,
@@ -67,6 +68,7 @@ const theme: RealmTheme = {
   topBarSize: 72,
   card: {
     background: baseColors.cardBackground,
+    boxShadow: '0px 0px 14px 2px rgba(0,0,0,0.75)'
   },
   mediaQueries,
   breakpoints,

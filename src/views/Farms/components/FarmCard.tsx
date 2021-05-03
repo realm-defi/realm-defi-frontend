@@ -33,7 +33,7 @@ const CardWrapper = styled.div<{ open?: boolean }>`
 
   ${({ theme }) => theme.mediaQueries.lg} {
     display: block;
-    max-height: ${({ open }) => (open ? '250px' : '90px')};
+    max-height: ${({ open }) => (open ? '250px' : '87px')};
     width: 950px;
     padding: 0 38px 0 24px;
   }

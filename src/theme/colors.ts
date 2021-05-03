@@ -8,6 +8,7 @@ export const baseColors: PriceColors = {
   primary: '#d74796',
   secondary: '#e49643',
   tertiary: '#c63535',
+  peons: '#5ca2d7',
   cardBackground: 'rgba(255, 255, 255, 0.7)',
 };
 

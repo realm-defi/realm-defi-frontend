@@ -34,7 +34,7 @@ const StyledButton = styled.button<StyledButtonProps>`
   border: 0;
   border-radius: 28px;
   color: ${props => !props.disabled ? props.theme.color.primary.main : props.theme.color.grey[500]};
-  cursor: pointer;
+  cursor: ${props => !props.disabled ? 'pointer' : 'not-allowed'};
   display: flex;
   font-weight: 700;
   height: 56px;
@@ -43,7 +43,6 @@ const StyledButton = styled.button<StyledButtonProps>`
   outline: none;
   padding: 0;
   margin: 0;
-  pointer-events: ${props => !props.disabled ? undefined : 'none'};
   text-transform: uppercase;
   width: 56px;
   &:hover {

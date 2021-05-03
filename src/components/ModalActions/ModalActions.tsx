@@ -10,7 +10,6 @@ const ModalActions: React.FC = ({ children }) => {
           <StyledModalAction>
             {child}
           </StyledModalAction>
-          {i < l - 1 && <StyledSpacer />}
         </>
       ))}
     </StyledModalActions>
@@ -19,6 +18,7 @@ const ModalActions: React.FC = ({ children }) => {
 
 const StyledModalActions = styled.div`
   align-items: center;
+  justify-content: space-around;
   background-color: ${props => props.theme.color.grey[100]}00;
   display: flex;
   height: 96px;
@@ -27,11 +27,6 @@ const StyledModalActions = styled.div`
 `
 
 const StyledModalAction = styled.div`
-  flex: 1;
-`
-
-const StyledSpacer = styled.div`
-  width: ${props => props.theme.spacing[4]}px;
 `
 
 export default ModalActions

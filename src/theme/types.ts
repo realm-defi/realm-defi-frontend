@@ -3,6 +3,7 @@ export type PriceColors = {
   primary?: string
   secondary?: string
   tertiary?: string
+  peons?: string
   cardBackground?: string
 }
 
