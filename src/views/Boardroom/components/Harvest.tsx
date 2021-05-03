@@ -3,38 +3,75 @@ import styled from 'styled-components';
 
 import Button from '../../../components/Button';
 import TokenSymbol from '../../../components/TokenSymbol';
-import Card from '../../../components/Card';
 import CardContent from '../../../components/CardContent';
-import Label from '../../../components/Label';
-import Value from '../../../components/Value';
-import CardIcon from '../../../components/CardIcon';
 import useHarvestFromBoardroom from '../../../hooks/useHarvestFromBoardroom';
 import useEarningsOnBoardroom from '../../../hooks/useEarningsOnBoardroom';
+import useCourtroomPermission from '../../../hooks/useCourtroomPermission';
 import { getDisplayBalance } from '../../../utils/formatBalance';
 
-const Harvest: React.FC = ({}) => {
+const Harvest: React.FC = () => {
   const { onReward } = useHarvestFromBoardroom();
+  const { canClaimReward } = useCourtroomPermission();
   const earnings = useEarningsOnBoardroom();
 
   return (
-    <Card>
+    <StyledCard>
       <CardContent>
         <StyledCardContentInner>
           <StyledCardHeader>
-            <CardIcon>
-              <TokenSymbol symbol="BAC" />
-            </CardIcon>
-            <Value value={getDisplayBalance(earnings)} />
-            <Label text="Basis Cash Earned" />
+            <TokenSymbol symbol="PEONS" size={192} />
+            <Value>{getDisplayBalance(earnings)}</Value>
+            <Label>PEONS earned</Label>
+            <Label>
+              Locked until
+              <Accent>EPOCH 192</Accent>
+            </Label>
           </StyledCardHeader>
           <StyledCardActions>
-            <Button onClick={onReward} text="Claim Reward" disabled={earnings.eq(0)} />
+            <Button
+              onClick={onReward}
+              text="Claim Reward"
+              disabled={earnings.eq(0) || !canClaimReward}
+            />
           </StyledCardActions>
         </StyledCardContentInner>
       </CardContent>
-    </Card>
+    </StyledCard>
   );
 };
+
+const StyledCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: ${({ theme }) => theme.card.background};
+  border-radius: 5px;
+  min-width: 300px;
+
+  ${({ theme }) => theme.mediaQueries.sm} {
+    min-width: 370px;
+  }
+
+  ${({ theme }) => theme.mediaQueries.lg} {
+    min-width: 370px;
+  }
+`;
+
+const Value = styled.span`
+  font-size: 36px;
+  font-weight: bold;
+  color: ${({ theme }) => theme.color.secondary.main};
+`;
+
+const Label = styled.span`
+  color: ${({ theme }) => theme.color.primary.main};
+  font-size: 24px;
+  font-weight: bold;
+`;
+
+const Accent = styled.span`
+  color: ${({ theme }) => theme.color.priceColors.primary};
+  margin-left: 5px;
+`;
 
 const StyledCardHeader = styled.div`
   align-items: center;
@@ -46,11 +83,6 @@ const StyledCardActions = styled.div`
   justify-content: center;
   margin-top: ${(props) => props.theme.spacing[6]}px;
   width: 100%;
-`;
-
-const StyledSpacer = styled.div`
-  height: ${(props) => props.theme.spacing[4]}px;
-  width: ${(props) => props.theme.spacing[4]}px;
 `;
 
 const StyledCardContentInner = styled.div`

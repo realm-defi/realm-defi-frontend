@@ -2,13 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import Button from '../../../components/Button';
-import Card from '../../../components/Card';
 import CardContent from '../../../components/CardContent';
-import CardIcon from '../../../components/CardIcon';
 import { AddIcon, RemoveIcon } from '../../../components/icons';
 import IconButton from '../../../components/IconButton';
-import Label from '../../../components/Label';
-import Value from '../../../components/Value';
 
 import useApprove, { ApprovalState } from '../../../hooks/useApprove';
 import useModal from '../../../hooks/useModal';
@@ -23,24 +19,21 @@ import useStakedBalanceOnBoardroom from '../../../hooks/useStakedBalanceOnBoardr
 import TokenSymbol from '../../../components/TokenSymbol';
 import useStakeToBoardroom from '../../../hooks/useStakeToBoardroom';
 import useWithdrawFromBoardroom from '../../../hooks/useWithdrawFromBoardroom';
-import useBoardroomVersion from '../../../hooks/useBoardroomVersion';
-import useRedeemOnBoardroom from '../../../hooks/useRedeemOnBoardroom';
+import useCourtroomPermission from '../../../hooks/useCourtroomPermission';
 
 const Stake: React.FC = () => {
   const basisCash = useBasisCash();
-  const boardroomVersion = useBoardroomVersion();
   const [approveStatus, approve] = useApprove(
     basisCash.NOBLES,
-    basisCash.boardroomByVersion(boardroomVersion).address,
+    basisCash.currentBoardroom().address,
   );
 
   const tokenBalance = useTokenBalance(basisCash.NOBLES);
   const stakedBalance = useStakedBalanceOnBoardroom();
-  const isOldBoardroomMember = boardroomVersion !== 'latest';
 
   const { onStake } = useStakeToBoardroom();
   const { onWithdraw } = useWithdrawFromBoardroom();
-  const { onRedeem } = useRedeemOnBoardroom('Redeem BAS for Boardroom Migration');
+  const { canWithdraw } = useCourtroomPermission();
 
   const [onPresentDeposit, onDismissDeposit] = useModal(
     <DepositModal
@@ -65,34 +58,28 @@ const Stake: React.FC = () => {
   );
 
   return (
-    <Card>
+    <StyledCard>
       <CardContent>
         <StyledCardContentInner>
           <StyledCardHeader>
-            <CardIcon>
-              <TokenSymbol symbol="BAS" />
-            </CardIcon>
-            <Value value={getDisplayBalance(stakedBalance)} />
-            <Label text="Basis Share Staked" />
+            <TokenSymbol symbol="NOBLES" size={192} />
+            <Value>{getDisplayBalance(stakedBalance)}</Value>
+            <Label>NOBLES Staked</Label>
+            <Label>
+              Locked until
+              <Accent>EPOCH 192</Accent>
+            </Label>
           </StyledCardHeader>
           <StyledCardActions>
-            {!isOldBoardroomMember && approveStatus !== ApprovalState.APPROVED ? (
+            {approveStatus !== ApprovalState.APPROVED ? (
               <Button
                 disabled={approveStatus !== ApprovalState.NOT_APPROVED}
                 onClick={approve}
-                text="Approve Basis Share"
+                text="Approve NOBLES"
               />
-            ) : isOldBoardroomMember ? (
-              <>
-                <Button
-                  onClick={onRedeem}
-                  variant="secondary"
-                  text="Settle & Withdraw"
-                />
-              </>
             ) : (
               <>
-                <IconButton onClick={onPresentWithdraw}>
+                <IconButton onClick={onPresentWithdraw} disabled={!canWithdraw}>
                   <RemoveIcon />
                 </IconButton>
                 <StyledActionSpacer />
@@ -104,9 +91,42 @@ const Stake: React.FC = () => {
           </StyledCardActions>
         </StyledCardContentInner>
       </CardContent>
-    </Card>
+    </StyledCard>
   );
 };
+
+const StyledCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: ${({ theme }) => theme.card.background};
+  border-radius: 5px;
+  min-width: 300px;
+
+  ${({ theme }) => theme.mediaQueries.sm} {
+    min-width: 370px;
+  }
+
+  ${({ theme }) => theme.mediaQueries.lg} {
+    min-width: 370px;
+  }
+`;
+
+const Label = styled.span`
+  color: ${({ theme }) => theme.color.primary.main};
+  font-size: 24px;
+  font-weight: bold;
+`;
+
+const Value = styled.span`
+  font-size: 36px;
+  font-weight: bold;
+  color: ${({ theme }) => theme.color.secondary.main};
+`;
+
+const Accent = styled.span`
+  color: ${({ theme }) => theme.color.priceColors.primary};
+  margin-left: 5px;
+`;
 
 const StyledCardHeader = styled.div`
   align-items: center;
