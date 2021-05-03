@@ -5,8 +5,8 @@ import Button from '../Button'
 import Input, { InputProps } from '../Input'
 
 interface TokenInputProps extends InputProps {
-  max: number | string,
-  symbol: string,
+  max?: number | string,
+  symbol?: string,
   onSelectMax?: () => void,
 }
 

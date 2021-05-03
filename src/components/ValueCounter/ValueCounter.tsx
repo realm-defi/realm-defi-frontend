@@ -6,6 +6,7 @@ interface ValueCounter {
   value: number;
   decimals: number;
   color?: string;
+  prefix?: string;
   suffix?: string;
 }
 
@@ -19,7 +20,7 @@ color: ${props => props.color};
 font-weight: bold;
 `
 
-const ValueCounter: React.FC<ValueCounter> = ({ value, decimals = 2, color, suffix = '' }) => {
+const ValueCounter: React.FC<ValueCounter> = ({ value, decimals = 2, color, suffix = '', prefix = '' }) => {
   const { countUp, update } = useCountUp({
     start: 0,
     end: value,
@@ -34,7 +35,7 @@ const ValueCounter: React.FC<ValueCounter> = ({ value, decimals = 2, color, suff
     updateValue.current(value);
   }, [value, updateValue]);
 
-  return <Wrapper color={color}>{countUp}{suffix}</Wrapper>;
+  return <Wrapper color={color}>{prefix}{countUp}{suffix}</Wrapper>;
 };
 
 export default ValueCounter;
